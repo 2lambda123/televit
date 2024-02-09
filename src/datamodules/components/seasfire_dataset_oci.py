@@ -112,6 +112,19 @@ def sample_dataset_with_ocis(ds, input_vars, oci_vars, oci_lag, target, target_s
 
 # ['random crop numpy array'] of shape (C, H, W) to (C, H', W') and apply same transformation to label
 def random_crop_fn(img, label, crop_size):
+    """"Returns a randomly cropped image and label of specified size from the input image and label."
+    Parameters:
+        - img (numpy array): Input image to be cropped.
+        - label (numpy array): Input label to be cropped.
+        - crop_size (tuple): Size of the cropped image and label in the format (height, width).
+    Returns:
+        - img (numpy array): Randomly cropped image of specified size.
+        - label (numpy array): Randomly cropped label of specified size.
+    Processing Logic:
+        - Generates random coordinates for cropping.
+        - Crops the input image and label using the generated coordinates.
+        - Returns the cropped image and label."""
+    
     h, w = img.shape[1:]
     new_h, new_w = crop_size
     top = secrets.SystemRandom().randint(0, h - new_h)
@@ -150,9 +163,32 @@ class BatcherDS_with_ocis(Dataset):
         self.std = np.stack([mean_std_dict[f'{var}_std'] for var in input_vars])
 
     def __len__(self):
+        """Returns the length of the batches list.
+        Parameters:
+            - self (object): The object whose batches list is being checked.
+        Returns:
+            - int: The length of the batches list.
+        Processing Logic:
+            - Get the length of the batches list.
+            - Return the length."""
+        
         return len(self.batches)
 
     def __getitem__(self, idx):
+        """This function returns a batch of normalized inputs, time-lagged OCI inputs, and targets for a given index.
+        Parameters:
+            - idx (int): Index of the batch to be returned.
+        Returns:
+            - inputs (numpy.ndarray): Normalized inputs stacked with positional variables.
+            - t_inputs (numpy.ndarray): Time-lagged OCI inputs.
+            - target (numpy.ndarray): Targets for the batch.
+        Processing Logic:
+            - Normalize inputs using mean and standard deviation.
+            - Divide OCI inputs by standard deviation.
+            - Concatenate inputs with positional variables.
+            - Transform inputs and targets if random crop is enabled.
+            - Convert targets to binary values if task is classification."""
+        
         def _normalize(x, var, mean_std_dict):
             return (x - mean_std_dict[f'{var}_mean']) / mean_std_dict[f'{var}_std']
 
