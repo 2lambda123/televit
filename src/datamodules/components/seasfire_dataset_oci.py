@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 from pathlib import Path
 import numpy as np
 from torchvision import transforms
-import random
+import secrets
 
 
 def sample_dataset_with_ocis(ds, input_vars, oci_vars, oci_lag, target, target_shift, patch_size=(2, 160, 160),
@@ -114,8 +114,8 @@ def sample_dataset_with_ocis(ds, input_vars, oci_vars, oci_lag, target, target_s
 def random_crop_fn(img, label, crop_size):
     h, w = img.shape[1:]
     new_h, new_w = crop_size
-    top = random.randint(0, h - new_h)
-    left = random.randint(0, w - new_w)
+    top = secrets.SystemRandom().randint(0, h - new_h)
+    left = secrets.SystemRandom().randint(0, w - new_w)
     img = img[:, top: top + new_h, left: left + new_w]
     label = label[top: top + new_h, left: left + new_w]
     return img, label
